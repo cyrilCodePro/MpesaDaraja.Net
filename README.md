@@ -2,13 +2,15 @@
 NugetPackage for .Net
 
 Install the Nuget Package by going to Package Console Manager and type
-Install-Package MPESADARAJA -Version 1.0.4
+
+                 Install-Package MPESADARAJA -Version 1.0.4
 
 For C2B 
 include namespace
 using MpesaDaraja;
-Then call the async Method  
-MpesaC2B.InititateCheckout(int paybill, int amount, string phone, int reference, string consumerkey, string consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
+Then call the async Method .
+                         
+                         MpesaC2B.InititateCheckout(int paybill, int amount, string phone, int reference, string consumerkey, string                                   consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
 
 For Examples To Use It;
 
@@ -25,3 +27,17 @@ For Examples To Use It;
  For Authentication Call The Method;
                       
             Authentication.AuthKey(string consumerkey, string consumersSecret,bool IsSandBox);
+      
+  For Example
+
+                       public static string GetToken(string consumerkey, string consumersSecret, bool IsSandBox)
+        {
+            string token = Authentication.AuthKey(consumerkey,consumersSecret,IsSandBox);
+            return token;
+        }
+        
+        
+        
+Please Note if Its SandBox Indicate IsSandBox equals true.
+Make sure to get your credentials from
+ https://developer.safaricom.co.ke

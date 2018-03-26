@@ -3,7 +3,7 @@ NugetPackage for .Net
 
 Install the Nuget Package by going to Package Console Manager and type
 
-                 Install-Package MPESADARAJA -Version 1.0.4
+                 Install-Package MPESADARAJA -Version 1.0.5
 
 For C2B 
 include namespace

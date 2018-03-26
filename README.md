@@ -14,7 +14,7 @@ Then call the async Method .
 
 For Examples To Use It;
 
-            public  async static Task<string> InitiateC2B(int paybill, int amount, string phone, int reference, string consumerkey, string consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
+            public  async static Task<string> InitiateC2B(string paybill, int amount, string phone, int reference, string consumerkey, string consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
         {
            
             string message = await MpesaC2B.InititateCheckout(paybill, amount, phone, reference, consumerkey, consumersSecret, confirmationUrl, validationUrl, IsSandBox);

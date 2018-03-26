@@ -10,7 +10,7 @@ include namespace
 using MpesaDaraja;
 Then call the async Method .
                          
-                         MpesaC2B.InititateCheckout(string paybill, int amount, string phone, int reference, string consumerkey, string                                   consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
+                         MpesaC2B.InititateCheckout(string paybill, int amount, string phone, int reference, string consumerkey, string consumersSecret, string confirmationUrl, string validationUrl, bool IsSandBox)
 
 For Examples To Use It;
 

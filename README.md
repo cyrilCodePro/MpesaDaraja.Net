@@ -30,7 +30,7 @@ For Examples To Use It;
       
   For Example
 
-                       public static string GetToken(string consumerkey, string consumersSecret, bool IsSandBox)
+      public static string GetToken(string consumerkey, string consumersSecret, bool IsSandBox)
         {
             string token = Authentication.AuthKey(consumerkey,consumersSecret,IsSandBox);
             return token;

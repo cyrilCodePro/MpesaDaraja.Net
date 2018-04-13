@@ -1,6 +1,6 @@
 # MpesaDaraja.Net
 NugetPackage for .Net
-
+Supports .Net Framework 4.6.1 or higher
 Install the Nuget Package by going to Package Console Manager and type
 
                  Install-Package MPESADARAJA -Version 1.0.6

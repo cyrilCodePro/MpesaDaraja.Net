@@ -34,7 +34,7 @@ To check LipaNaMpesaStatus:
                  
 For Transaction Status:
 
-                 string [] result=Mpesa.TransactionStatus(string consumerKey, string consumersecret, bool isSandbox, string    initiatorName,   string password,string transactionId,string Business, string remarks, string queueTimeUrl, string     resultUrl,string occassion);
+                 string [] result=Mpesa.TransactionStatus(string consumerKey, string consumersecret, bool isSandbox, string    initiatorName,   string password,string transactionId,string BusinessShortcode, string remarks, string queueTimeUrl, string     resultUrl,string occassion);
                  
  For Reversal:
                 
@@ -50,3 +50,5 @@ For Authentication token:
 Please Note if Its SandBox Indicate IsSandBox equals true.
 Make sure to get your credentials from
  https://developer.safaricom.co.ke
+ 
+ NOTE PASSWORD FOR B2C ,C2B,REVERSAL Indicates Security Credentials

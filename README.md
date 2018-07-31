@@ -13,6 +13,15 @@ include namespace
 using MpesaDaraja;
 
               string []result=  Mpesa.C2B(string consumerKey, string consumersecret, bool isSandbox, string paybill, decimal amount, string phone, string reference);
+     
+     
+1. for production registet Url then on your endpoint for validation url and confirmation url do this
+         
+                public JObject Confirm(JObject objects)
+        {
+            var data = Mpesa.C2BData(objects);
+             return new JObject();
+        }
 
 FOR B2B:
  

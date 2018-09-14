@@ -6,7 +6,7 @@ namespace MpesaDaraja.Models
 {
     public class DarajaResponse
     {
-        public string OriginatorConverstionID { get; set; }
+        public string OriginatorConversationID { get; set; }
         public string ConversationID { get; set; }
         public string ResponseDescription { get; set; }
     }

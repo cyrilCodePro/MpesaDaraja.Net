@@ -15,7 +15,10 @@ namespace MpesaDaraja
 {
     public class Mpesa
     {
-        public static string Authenticate(string consumerKey, string consumersecret, bool isSandbox = true)
+        public static readonly string sandboxUrl = "https://sandbox.safaricom.co.ke";
+        public static readonly string liveUrl = "https://api.safaricom.co.ke";
+
+        public static string Authenticate(string consumerKey, string consumersecret, bool isSandbox)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             string baseurl = "https://sandbox.safaricom.co.ke";
@@ -39,11 +42,36 @@ namespace MpesaDaraja
             return accessToken.access_token;
         }
 
+        public async Task<string> GetAccessTokenAsync(string consumerKey, string consumersecret, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            string baseUrl = getBaseUrl(isSandbox);
+            string appkey = $"{consumerKey}:{consumersecret}";
+            string auth = ToBase64String(appkey);
+
+            var client = new RestClient(baseUrl);
+            var request = new RestRequest("oauth/v1/generate?grant_type=client_credentials", Method.GET);
+            request.Parameters.Clear();
+            request.AddHeader("authorization", "Basic " + auth);
+            request.AddHeader("cache-control", "no-cache");
+
+            IRestResponse response = await client.ExecuteTaskAsync(request);
+            if (response.Content.Contains("error"))
+            {
+                return response.Content;
+            }
+
+            AccessToken accessToken = JsonConvert.DeserializeObject<AccessToken>(response.Content);
+            return accessToken.access_token;
+        }
+
         public static ProductionC2B C2BData(JObject expectedJsonObject)
         {
             ProductionC2B test = JsonConvert.DeserializeObject<ProductionC2B>(expectedJsonObject.ToString());
             return test;
         }
+
         public static string[] AccountBalance(string consumerKey, string consumersecret, bool isSandbox, string initiatorName,
             string password, string Business, string remarks,
             string queueTimeUrl, string resultUrl)
@@ -51,7 +79,6 @@ namespace MpesaDaraja
             string security = Encryption(password.Trim());
             JObject simulate = new JObject
             {
-
                 { "Initiator", initiatorName },
                 { "SecurityCredential", security },
                  { "CommandID", "AccountBalance" },
@@ -88,6 +115,22 @@ namespace MpesaDaraja
               " ResponseDescription:"+ test.ResponseDescription,
             };
         }
+
+        public async Task<string[]> AccountBalanceAsync(string consumerKey, string consumersecret, AccountBalanceRequest accountBalance, bool isSandbox = true)
+        {
+            string security = Encryption(accountBalance.Password.Trim());
+            accountBalance.SecurityCredential = security;
+            accountBalance.IdentifierType = IdentifierType.OrganizationShortCode;
+            accountBalance.CommandID = "AccountBalance";
+
+            JObject jObject = new JObject(accountBalance);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/accountbalance/v1/query", jObject);
+        }
+
         public static string[] Reversal(string consumerKey, string consumersecret, bool isSandbox, string initiatorName,
             string password, string transactionId, decimal amount, string receiverparty, string remarks,
             string queueTimeUrl, string resultUrl, string occassion)
@@ -136,6 +179,22 @@ namespace MpesaDaraja
                "ResponseDescription:"+ test.ResponseDescription,
             };
         }
+
+        public async Task<string[]> ReversalAsync(string consumerKey, string consumersecret, ReversalRequest reversalRequest, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            reversalRequest.SecurityCredential = Encryption(reversalRequest.Password.Trim());
+            reversalRequest.CommandID = "TransactionReversal";
+            reversalRequest.ReceiverIdentifierType = "11";
+
+            JObject jObject = new JObject(reversalRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/reversal/v1/request", jObject);
+        }
+
         public static string[] TransactionStatus(string consumerKey, string consumersecret, bool isSandbox, string initiatorName,
             string password, string transactionId, string Business, string remarks, string queueTimeUrl, string resultUrl, string occassion)
         {
@@ -182,11 +241,22 @@ namespace MpesaDaraja
                 "ResponseDescription:"+test.ResponseDescription,
             };
         }
-        
-        public static string ToBase64String(string sInput)
+
+        public async Task<string[]> TransactionStatusAsync(string consumerKey, string consumersecret, TransactionStatusRequest transactionStatus, bool isSandbox = true)
         {
-            return Convert.ToBase64String(Encoding.GetEncoding("iso-8859-1").GetBytes(sInput));
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            transactionStatus.SecurityCredential = Encryption(transactionStatus.Password.Trim());
+            transactionStatus.CommandID = "TransactionStatusQuery";
+            transactionStatus.IdentifierType = IdentifierType.MSISDN.ToString();
+
+            JObject jObject = new JObject(transactionStatus);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/transactionstatus/v1/query", jObject);
         }
+
         public static string[] C2B(string consumerKey, string consumersecret,
             bool isSandbox, string paybill, decimal amount, string phone, string reference)
         {
@@ -227,6 +297,20 @@ namespace MpesaDaraja
                 "ResponseDescription:"+test.ResponseDescription,
             };
         }
+
+        public async Task<string[]> C2BAsync(string consumerKey, string consumersecret, C2BRequest c2BRequest, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            c2BRequest.CommandID = "CustomerPayBillOnline";
+            JObject jObject = new JObject(c2BRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/c2b/v1/simulate", jObject);
+        }
+
         public static string[] B2B(string consumerKey, string consumersecret, bool isSandbox, string initiatorName,
             string password, decimal amount,
             string Business, string ReceivingBusiness, string remarks, string queueTimeUrl, string resultUrl,
@@ -278,6 +362,21 @@ namespace MpesaDaraja
             };
 
         }
+
+        public async Task<string[]> B2BAsync(string consumerKey, string consumersecret, B2BRequest b2BRequest, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            b2BRequest.SecurityCredential = Encryption(b2BRequest.Password);
+            b2BRequest.CommandID = "BusinessToBusinessTransfer";
+            JObject jObject = new JObject(b2BRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/b2b/v1/paymentrequest", jObject);
+        }
+
         public static string[] B2C(string consumerKey, string consumersecret, bool isSandbox, string initiatorName,
             string password, decimal amount, string Business, string customerPhone, string remarks, string queueTimeUrl,
             string resultUrl, string occassion)
@@ -324,6 +423,20 @@ namespace MpesaDaraja
                 "ResponseDescription:"+test.ResponseDescription,
             };
         }
+
+        public async Task<string[]> B2CAsync(string consumerKey, string consumersecret, B2CRequest b2CRequest, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            b2CRequest.SecurityCredential = Encryption(b2CRequest.Password);
+            b2CRequest.CommandID = "BusinessPayment";
+            JObject jObject = new JObject(b2CRequest);
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendApiRequestAsync(auth, baseUrl, "mpesa/b2c/v1/paymentrequest", jObject);
+        }
+
         public static string[] LiLipaNaMpesaOnlineStatus(string consumerKey, string consumersecret, string password,
             bool isSandbox, DateTime TimeOfTransaction, string BusinessShortcode, string checkoutRequestID)
         {
@@ -365,15 +478,21 @@ namespace MpesaDaraja
                "ResponseCode:" +test.ResponseCode
             };
         }
-        public static string TimeStamp(DateTime TimeOfTransaction)
+
+        public async Task<string[]> StkPushQueryAsync(string consumerKey, string consumersecret, ExpressQueryRequest queryRequest, bool isSandbox = true)
         {
-            string month = TimeOfTransaction.Month < 10 ? "0" + TimeOfTransaction.Month : TimeOfTransaction.Month.ToString();
-            string day = TimeOfTransaction.Day < 10 ? "0" + TimeOfTransaction.Day : TimeOfTransaction.Day.ToString();
-            string hour = TimeOfTransaction.Hour < 10 ? "0" + TimeOfTransaction.Hour : TimeOfTransaction.Hour.ToString();
-            string min = TimeOfTransaction.Minute < 10 ? "0" + TimeOfTransaction.Minute : TimeOfTransaction.Minute.ToString();
-            string sec = TimeOfTransaction.Second < 10 ? "0" + TimeOfTransaction.Second : TimeOfTransaction.Second.ToString();
-            return $"{TimeOfTransaction.Year}{month}{day}{hour}{min}{sec}";
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            queryRequest.TimeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            queryRequest.Password = base64Encode(queryRequest.BusinessShortCode + queryRequest.Password + queryRequest.TimeStamp);
+            JObject jObject = new JObject(queryRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendExpressRequestAsync(auth, baseUrl, "mpesa/stkpushquery/v1/query", jObject);
         }
+
 
         public static string[] LipaNaMpesaOnlineInitiate(string consumerKey, string consumersecret, string password,
             bool isSandbox, DateTime TimeOfTransaction, decimal amount, string customerPhone, string BusinessPaybillOrTill,
@@ -425,6 +544,22 @@ namespace MpesaDaraja
                "ResponseCode:" +test.ResponseCode
             };
         }
+
+        public async Task<string[]> StkPushInitiateAsync(string consumerKey, string consumersecret, string password, ExpressInitiateRequest expressInitiateRequest, bool isSandbox = true)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            expressInitiateRequest.TransactionType = "CustomerPayBillOnline";
+            expressInitiateRequest.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            expressInitiateRequest.Password = base64Encode(expressInitiateRequest.BusinessShortCode + expressInitiateRequest.Password + expressInitiateRequest.Timestamp);
+            JObject jObject = new JObject(expressInitiateRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendExpressRequestAsync(auth, baseUrl, "mpesa/stkpush/v1/processrequest", jObject);
+        }
+
         public static string RegisterUrl(string consumerKey, string consumersecret, bool isSandbox, string paybill,
             string validationUrl, string confirmationUrl)
         {
@@ -451,6 +586,72 @@ namespace MpesaDaraja
             return response.Content;
 
         }
+
+        public async Task<string[]> RegisterUrlAsync(string consumerKey, string consumersecret,RegisterUrlRequest registerUrlRequest, bool isSandbox = true)
+        {
+            registerUrlRequest.ResponseType = "Completed";
+            JObject jObject = new JObject(registerUrlRequest);
+
+            string auth = Authenticate(consumerKey, consumersecret, isSandbox);
+            string baseUrl = getBaseUrl(isSandbox);
+
+            return await SendExpressRequestAsync(auth, baseUrl, "mpesa/c2b/v1/registerurl", jObject);
+        }
+
+
+
+        private async Task<string[]> SendApiRequestAsync(string auth, string baseDarajaUrl, string apiUrl, JObject jObject)
+        {
+            var client = new RestClient(baseDarajaUrl);
+
+            var request = new RestRequest(apiUrl, Method.POST);
+            request.Parameters.Clear();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", $"Bearer " + auth);
+            request.AddParameter("application/json", jObject, ParameterType.RequestBody);
+            IRestResponse response = await client.ExecuteTaskAsync(request);
+            if (response.Content.Contains("error"))
+            {
+                return response.Content.Split(':');
+            }
+
+            DarajaResponse darajaResponse = JsonConvert.DeserializeObject<DarajaResponse>(response.Content);
+            return new string[]
+            {
+              "ConversationId:" + darajaResponse.ConversationID,
+              "OriginatorConversationID:"+  darajaResponse.OriginatorConversationID,
+              " ResponseDescription:"+ darajaResponse.ResponseDescription,
+            };
+        }
+
+        private async Task<string[]> SendExpressRequestAsync(string auth, string baseDarajaUrl, string apiUrl, JObject jObject)
+        {
+            var client = new RestClient(baseDarajaUrl);
+
+            var request = new RestRequest(apiUrl, Method.POST);
+            request.Parameters.Clear();
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", $"Bearer " + auth);
+            request.AddParameter("application/json", jObject, ParameterType.RequestBody);
+            IRestResponse response = await client.ExecuteTaskAsync(request);
+            if (response.Content.Contains("error"))
+            {
+                return response.Content.Split(':');
+            }
+
+            ExpressResponse expressResponse = JsonConvert.DeserializeObject<ExpressResponse>(response.Content);
+            return new string[]
+            {
+               "CheckoutRequestID:"+ expressResponse.CheckoutRequestID,
+                "MerchantRequestID:"+expressResponse.MerchantRequestID,
+                "ResponseDescription:"+expressResponse.ResponseDescription,
+                "CustomerMessage:"+expressResponse.CustomerMessage,
+               "ResponseCode:" +expressResponse.ResponseCode
+            };
+        }
+
+
+
         public static string Encryption(string strText)
         {
             var buildDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -476,6 +677,39 @@ namespace MpesaDaraja
                     rsa.PersistKeyInCsp = false;
                 }
             }
+        }        
+
+        private string getBaseUrl(bool isSandbox)
+        {
+            string baseUrl = sandboxUrl;
+            if (!isSandbox)
+            {
+                baseUrl = liveUrl;
+            }
+
+            return baseUrl;
+        }
+
+        public static string ToBase64String(string sInput)
+        {
+            return Convert.ToBase64String(Encoding.GetEncoding("iso-8859-1").GetBytes(sInput));
+        }
+
+        private string base64Encode(string plainText)
+        {
+            var bytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string TimeStamp(DateTime TimeOfTransaction)
+        {
+            //string month = TimeOfTransaction.Month < 10 ? "0" + TimeOfTransaction.Month : TimeOfTransaction.Month.ToString();
+            //string day = TimeOfTransaction.Day < 10 ? "0" + TimeOfTransaction.Day : TimeOfTransaction.Day.ToString();
+            //string hour = TimeOfTransaction.Hour < 10 ? "0" + TimeOfTransaction.Hour : TimeOfTransaction.Hour.ToString();
+            //string min = TimeOfTransaction.Minute < 10 ? "0" + TimeOfTransaction.Minute : TimeOfTransaction.Minute.ToString();
+            //string sec = TimeOfTransaction.Second < 10 ? "0" + TimeOfTransaction.Second : TimeOfTransaction.Second.ToString();
+            //return $"{TimeOfTransaction.Year}{month}{day}{hour}{min}{sec}";
+            return TimeOfTransaction.ToString("yyyyMMddHHmmss");
         }
 
     }

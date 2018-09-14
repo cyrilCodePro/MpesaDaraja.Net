@@ -123,7 +123,7 @@ namespace MpesaDaraja
             accountBalance.IdentifierType = IdentifierType.OrganizationShortCode;
             accountBalance.CommandID = "AccountBalance";
 
-            JObject jObject = new JObject(accountBalance);
+            JObject jObject = JObject.FromObject(accountBalance);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -187,7 +187,7 @@ namespace MpesaDaraja
             reversalRequest.CommandID = "TransactionReversal";
             reversalRequest.ReceiverIdentifierType = "11";
 
-            JObject jObject = new JObject(reversalRequest);
+            JObject jObject = JObject.FromObject(reversalRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -249,7 +249,7 @@ namespace MpesaDaraja
             transactionStatus.CommandID = "TransactionStatusQuery";
             transactionStatus.IdentifierType = IdentifierType.MSISDN.ToString();
 
-            JObject jObject = new JObject(transactionStatus);
+            JObject jObject = JObject.FromObject(transactionStatus);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -303,7 +303,7 @@ namespace MpesaDaraja
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             c2BRequest.CommandID = "CustomerPayBillOnline";
-            JObject jObject = new JObject(c2BRequest);
+            JObject jObject = JObject.FromObject(c2BRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -369,7 +369,7 @@ namespace MpesaDaraja
 
             b2BRequest.SecurityCredential = Encryption(b2BRequest.Password);
             b2BRequest.CommandID = "BusinessToBusinessTransfer";
-            JObject jObject = new JObject(b2BRequest);
+            JObject jObject = JObject.FromObject(b2BRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -430,7 +430,7 @@ namespace MpesaDaraja
 
             b2CRequest.SecurityCredential = Encryption(b2CRequest.Password);
             b2CRequest.CommandID = "BusinessPayment";
-            JObject jObject = new JObject(b2CRequest);
+            JObject jObject = JObject.FromObject(b2CRequest);
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
 
@@ -485,7 +485,7 @@ namespace MpesaDaraja
 
             queryRequest.TimeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
             queryRequest.Password = base64Encode(queryRequest.BusinessShortCode + queryRequest.Password + queryRequest.TimeStamp);
-            JObject jObject = new JObject(queryRequest);
+            JObject jObject = JObject.FromObject(queryRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -545,14 +545,14 @@ namespace MpesaDaraja
             };
         }
 
-        public async Task<string[]> StkPushInitiateAsync(string consumerKey, string consumersecret, string password, ExpressInitiateRequest expressInitiateRequest, bool isSandbox = true)
+        public async Task<string[]> StkPushInitiateAsync(string consumerKey, string consumersecret, ExpressInitiateRequest expressInitiateRequest, bool isSandbox = true)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             expressInitiateRequest.TransactionType = "CustomerPayBillOnline";
             expressInitiateRequest.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
             expressInitiateRequest.Password = base64Encode(expressInitiateRequest.BusinessShortCode + expressInitiateRequest.Password + expressInitiateRequest.Timestamp);
-            JObject jObject = new JObject(expressInitiateRequest);
+            JObject jObject = JObject.FromObject(expressInitiateRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);
@@ -590,7 +590,7 @@ namespace MpesaDaraja
         public async Task<string[]> RegisterUrlAsync(string consumerKey, string consumersecret,RegisterUrlRequest registerUrlRequest, bool isSandbox = true)
         {
             registerUrlRequest.ResponseType = "Completed";
-            JObject jObject = new JObject(registerUrlRequest);
+            JObject jObject = JObject.FromObject(registerUrlRequest);
 
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseUrl = getBaseUrl(isSandbox);

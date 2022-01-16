@@ -22,7 +22,7 @@ namespace MpesaDaraja
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -90,7 +90,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -154,7 +154,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -217,7 +217,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -272,7 +272,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -336,7 +336,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -398,7 +398,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -451,7 +451,7 @@ namespace MpesaDaraja
             };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
@@ -519,7 +519,7 @@ namespace MpesaDaraja
                 };
             string auth = Authenticate(consumerKey, consumersecret, isSandbox);
             string baseurl = "https://sandbox.safaricom.co.ke";
-            if (isSandbox == false)
+            if (!isSandbox)
             {
                 baseurl = "https://api.safaricom.co.ke";
             }
